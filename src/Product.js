@@ -1,22 +1,51 @@
 
 import React from 'react'
 import styled from 'styled-components'
+import { db } from './firebase'
 
-function Product() {
+function Product({ title, price, rating, image, id }) {
+    /*when I click the add to cart  button it adds to the cart and database
+    and if it already exists the it just updates it by one */
+    const addToCart = () => {
+        const cartItem = db.collection("cartItems").doc(id);
+        cartItem.get()
+            .then((doc) => {
+                if (doc.exists) {
+                    cartItem.update({
+                        quantity: doc.data().quantity + 1
+                    })
+                } else {  /** here it checks and if the product is not added it adds */
+                    db.collection("cartItems").doc(id).set({
+                        name: title,
+                        image: image,
+                        price: price,
+                        quantity: 1
+                    })
+                }
+            })
+    }
+
+
+
     return (
         <Container>
             <Title>
-                Samsung M20
+                {title}
             </Title>
             <Price>
-                $1200
+                ₹{price}
             </Price>
             <Rating>
-                ⭐⭐⭐⭐⭐
+                {
+                    Array(rating)
+                        .fill()  /** It takes the rating from the database and updates it her */
+                        .map(rating => <p>⭐</p>)
+                }
             </Rating>
-            <Image src="https://m.media-amazon.com/images/I/71-Su4Wr0HL._AC_UY218_.jpg" />
+            <Image src={image} />
             <ActionSection>
-                <AddToCartButton>
+                <AddToCartButton
+                    onClick={addToCart} >
                     Add to cart
                 </AddToCartButton>
             </ActionSection>
@@ -28,39 +57,39 @@ export default Product
 
 
 const Container = styled.div`
-background-color: white;
-max-height: 400px;
-flex: 1 ;
-padding: 20px;
-margin: 10px;
-z-index:100;
-display: flex;
-flex-direction: column;
-margin-top: 3px;
+    background-color: white;
+    z-index: 100;
+    flex: 1;
+    padding: 20px;
+    margin: 10px;
+    max-height: 400px;
+    display: flex;
+    flex-direction: column;
 `
-
 const Title = styled.span``
 const Price = styled.span`
-font-weight: 500;
-
+    font-weight: 500;
+    margin-top: 3px;
 `
-const Rating = styled.div``
+const Rating = styled.div`
+    display: flex;
+`
 const Image = styled.img`
-max-height: 200px ;
-object-fit: contain;
+    max-height: 200px;
+    object-fit: contain;
 `
 
 const ActionSection = styled.div`
-margin-top: 12px;
-display: grid;
-place-items: center;
+    margin-top: 12px;
+    display: grid;
+    place-items: center;
 `
 
 const AddToCartButton = styled.button`
-width: 100px ;
-height: 30px ;
-background-color: #f0c14b;
-border: 2px solid #a88734 ;
-border-radius: 2px;
-
+    width: 100px;
+    height: 30px;
+    background-color: #f0c14b;
+    border: 2px solid #a88734;
+    border-radius: 2px;
+    cursor: pointer;
 `
